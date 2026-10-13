@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Recruiter - Job ATS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Job ATS - Nhà tuyển dụng</a>
+      <div class="d-flex align-items-center gap-3 text-white">
+        <span id="userName"></span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Đăng xuất</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2 sidebar py-3">
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#" data-tab="jobs">Tin tuyển dụng</a>
+          <a class="nav-link" href="#" data-tab="applicants">Ứng viên</a>
+          <a class="nav-link" href="#" data-tab="interviews">Lịch phỏng vấn</a>
+          <a class="nav-link" href="#" data-tab="company">Công ty</a>
+        </nav>
+      </div>
+      <div class="col-md-10 p-4">
+        <div id="alertBox"></div>
+
+        <!-- Jobs -->
+        <div id="tab-jobs">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Tin tuyển dụng của tôi</h4>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#jobModal" onclick="openJobModal()">+ Tạo tin mới</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead><tr><th>Vị trí</th><th>Công ty</th><th>Địa điểm</th><th>Lương</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody id="jobTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Applicants -->
+        <div id="tab-applicants" class="d-none">
+          <h4 class="mb-3">Danh sách ứng viên</h4>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead><tr><th>Ứng viên</th><th>Email</th><th>Vị trí</th><th>Ngày nộp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody id="appTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Interviews -->
+        <div id="tab-interviews" class="d-none">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Lịch phỏng vấn</h4>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead><tr><th>Ứng viên</th><th>Vị trí</th><th>Thời gian</th><th>Hình thức</th><th>Kết quả</th><th>Thao tác</th></tr></thead>
+              <tbody id="interviewTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Company -->
+        <div id="tab-company" class="d-none">
+          <h4 class="mb-3">Thông tin công ty</h4>
+          <form id="companyForm" class="card p-4">
+            <input type="hidden" id="companyId">
+            <div class="mb-3"><label class="form-label">Tên công ty *</label><input type="text" class="form-control" id="c_name" required></div>
+            <div class="mb-3"><label class="form-label">Mô tả</label><textarea class="form-control" id="c_description" rows="3"></textarea></div>
+            <div class="mb-3"><label class="form-label">Địa chỉ</label><input type="text" class="form-control" id="c_address"></div>
+            <div class="mb-3"><label class="form-label">Website</label><input type="text" class="form-control" id="c_website"></div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Job Modal -->
+  <div class="modal fade" id="jobModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="jobModalTitle">Tạo tin tuyển dụng</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="jobId">
+          <div class="mb-3"><label class="form-label">Công ty</label>
+            <select class="form-select" id="jobCompany"></select>
+          </div>
+          <div class="mb-3"><label class="form-label">Tiêu đề *</label><input type="text" class="form-control" id="jobTitle" required></div>
+          <div class="mb-3"><label class="form-label">Mô tả *</label><textarea class="form-control" id="jobDesc" rows="3" required></textarea></div>
+          <div class="mb-3"><label class="form-label">Yêu cầu</label><textarea class="form-control" id="jobReq" rows="2"></textarea></div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Địa điểm</label><input type="text" class="form-control" id="jobLoc"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Lương min</label><input type="number" class="form-control" id="jobSalMin"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Lương max</label><input type="number" class="form-control" id="jobSalMax"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3"><label class="form-label">Loại hình</label>
+              <select class="form-select" id="jobType">
+                <option value="full_time">Full-time</option>
+                <option value="part_time">Part-time</option>
+                <option value="internship">Internship</option>
+                <option value="remote">Remote</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3"><label class="form-label">Trạng thái</label>
+              <select class="form-select" id="jobStatus">
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveJob()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interview Modal -->
+  <div class="modal fade" id="interviewModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Tạo lịch phỏng vấn</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="ivAppId">
+          <div class="mb-3"><label class="form-label">Thời gian *</label><input type="datetime-local" class="form-control" id="ivDate" required></div>
+          <div class="mb-3"><label class="form-label">Hình thức</label>
+            <select class="form-select" id="ivType">
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+              <option value="phone">Phone</option>
+            </select>
+          </div>
+          <div class="mb-3"><label class="form-label">Link / Địa điểm</label><input type="text" class="form-control" id="ivLink"></div>
+          <div class="mb-3"><label class="form-label">Ghi chú</label><textarea class="form-control" id="ivNotes" rows="2"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveInterview()">Tạo lịch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    const user = requireAuth(['recruiter', 'admin']);
+    if (!user) throw new Error('auth');
+    document.getElementById('userName').textContent = user.full_name;
+
+    document.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('[data-tab]').forEach(a => a.classList.remove('active'));
+        el.classList.add('active');
+        ['jobs','applicants','interviews','company'].forEach(t => {
+          document.getElementById('tab-' + t).classList.toggle('d-none', t !== el.dataset.tab);
+        });
+        if (el.dataset.tab === 'applicants') loadApplicants();
+        if (el.dataset.tab === 'interviews') loadInterviews();
+        if (el.dataset.tab === 'company') loadCompany();
+      });
+    });
+
+    let myCompanies = [];
+
+    async function loadJobs() {
+      try {
+        const jobs = await JobsAPI.myList();
+        document.getElementById('jobTable').innerHTML = jobs.map(j => `
+          <tr>
+            <td>${j.title}</td>
+            <td>${j.company_name}</td>
+            <td>${j.location || '-'}</td>
+            <td>${formatSalary(j.salary_min, j.salary_max)}</td>
+            <td>${statusBadge(j.status)}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" onclick='editJob(${JSON.stringify(j)})'>Sửa</button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteJob(${j.id})">Xóa</button>
+            </td>
+          </tr>
+        `).join('') || '<tr><td colspan="6" class="text-muted">Chưa có tin nào.</td></tr>';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadCompanySelect() {
+      try {
+        myCompanies = await CompaniesAPI.my();
+        const sel = document.getElementById('jobCompany');
+        sel.innerHTML = myCompanies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        if (!myCompanies.length) {
+          sel.innerHTML = '<option value="">Bạn cần tạo công ty trước</option>';
+        }
+      } catch (e) {}
+    }
+
+    function openJobModal() {
+      document.getElementById('jobId').value = '';
+      document.getElementById('jobModalTitle').textContent = 'Tạo tin tuyển dụng';
+      document.getElementById('jobTitle').value = '';
+      document.getElementById('jobDesc').value = '';
+      document.getElementById('jobReq').value = '';
+      document.getElementById('jobLoc').value = '';
+      document.getElementById('jobSalMin').value = '';
+      document.getElementById('jobSalMax').value = '';
+      document.getElementById('jobType').value = 'full_time';
+      document.getElementById('jobStatus').value = 'open';
+      loadCompanySelect();
+    }
+
+    function editJob(j) {
+      document.getElementById('jobId').value = j.id;
+      document.getElementById('jobModalTitle').textContent = 'Sửa tin tuyển dụng';
+      document.getElementById('jobTitle').value = j.title;
+      document.getElementById('jobDesc').value = j.description;
+      document.getElementById('jobReq').value = j.requirements || '';
+      document.getElementById('jobLoc').value = j.location || '';
+      document.getElementById('jobSalMin').value = j.salary_min || '';
+      document.getElementById('jobSalMax').value = j.salary_max || '';
+      document.getElementById('jobType').value = j.job_type;
+      document.getElementById('jobStatus').value = j.status;
+      loadCompanySelect().then(() => {
+        document.getElementById('jobCompany').value = j.company_id;
+      });
+      new bootstrap.Modal(document.getElementById('jobModal')).show();
+    }
+
+    async function saveJob() {
+      const id = document.getElementById('jobId').value;
+      const data = {
+        company_id: parseInt(document.getElementById('jobCompany').value),
+        title: document.getElementById('jobTitle').value,
+        description: document.getElementById('jobDesc').value,
+        requirements: document.getElementById('jobReq').value,
+        location: document.getElementById('jobLoc').value,
+        salary_min: document.getElementById('jobSalMin').value ? parseInt(document.getElementById('jobSalMin').value) : null,
+        salary_max: document.getElementById('jobSalMax').value ? parseInt(document.getElementById('jobSalMax').value) : null,
+        job_type: document.getElementById('jobType').value,
+        status: document.getElementById('jobStatus').value
+      };
+      try {
+        if (id) await JobsAPI.update(id, data);
+        else await JobsAPI.create(data);
+        bootstrap.Modal.getInstance(document.getElementById('jobModal')).hide();
+        showAlert('alertBox', 'Lưu thành công!', 'success');
+        loadJobs();
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function deleteJob(id) {
+      if (!confirm('Xóa tin này?')) return;
+      try {
+        await JobsAPI.remove(id);
+        showAlert('alertBox', 'Đã xóa.', 'success');
+        loadJobs();
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadApplicants() {
+      try {
+        const apps = await ApplicationsAPI.forRecruiter();
+        document.getElementById('appTable').innerHTML = apps.map(a => `
+          <tr>
+            <td>${a.full_name}</td>
+            <td>${a.email}</td>
+            <td>${a.job_title}</td>
+            <td>${formatDate(a.applied_at)}</td>
+            <td>
+              <select class="form-select form-select-sm" onchange="updateStatus(${a.id}, this.value)">
+                ${['pending','reviewing','interview','offered','rejected','hired'].map(s =>
+                  `<option value="${s}" ${a.status===s?'selected':''}>${s}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" onclick="openInterviewModal(${a.id})">Tạo lịch PV</button>
+            </td>
+          </tr>
+        `).join('') || '<tr><td colspan="6" class="text-muted">Chưa có ứng viên.</td></tr>';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        await ApplicationsAPI.updateStatus(id, status);
+        showAlert('alertBox', 'Cập nhật trạng thái thành công.', 'success');
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    function openInterviewModal(appId) {
+      document.getElementById('ivAppId').value = appId;
+      document.getElementById('ivDate').value = '';
+      document.getElementById('ivLink').value = '';
+      document.getElementById('ivNotes').value = '';
+      new bootstrap.Modal(document.getElementById('interviewModal')).show();
+    }
+
+    async function saveInterview() {
+      try {
+        await InterviewsAPI.create({
+          application_id: parseInt(document.getElementById('ivAppId').value),
+          interview_date: document.getElementById('ivDate').value.replace('T', ' ') + ':00',
+          interview_type: document.getElementById('ivType').value,
+          location_or_link: document.getElementById('ivLink').value,
+          notes: document.getElementById('ivNotes').value
+        });
+        bootstrap.Modal.getInstance(document.getElementById('interviewModal')).hide();
+        showAlert('alertBox', 'Tạo lịch phỏng vấn thành công!', 'success');
+        loadApplicants();
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadInterviews() {
+      try {
+        const list = await InterviewsAPI.forRecruiter();
+        document.getElementById('interviewTable').innerHTML = list.map(i => `
+          <tr>
+            <td>${i.applicant_name}</td>
+            <td>${i.job_title}</td>
+            <td>${formatDate(i.interview_date)}</td>
+            <td>${i.interview_type}</td>
+            <td>
+              <select class="form-select form-select-sm" onchange="updateInterviewResult(${i.id}, this.value)">
+                ${['pending','passed','failed','cancelled'].map(s =>
+                  `<option value="${s}" ${i.result===s?'selected':''}>${s}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td>${i.location_or_link || '-'}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="6" class="text-muted">Chưa có lịch.</td></tr>';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function updateInterviewResult(id, result) {
+      try {
+        await InterviewsAPI.update(id, { result });
+        showAlert('alertBox', 'Cập nhật kết quả thành công.', 'success');
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadCompany() {
+      try {
+        const list = await CompaniesAPI.my();
+        if (list.length) {
+          const c = list[0];
+          document.getElementById('companyId').value = c.id;
+          document.getElementById('c_name').value = c.name;
+          document.getElementById('c_description').value = c.description || '';
+          document.getElementById('c_address').value = c.address || '';
+          document.getElementById('c_website').value = c.website || '';
+        }
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    document.getElementById('companyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('companyId').value;
+      const data = {
+        name: document.getElementById('c_name').value,
+        description: document.getElementById('c_description').value,
+        address: document.getElementById('c_address').value,
+        website: document.getElementById('c_website').value
+      };
+      try {
+        if (id) await CompaniesAPI.update(id, data);
+        else await CompaniesAPI.create(data);
+        showAlert('alertBox', 'Lưu công ty thành công!', 'success');
+        loadCompany();
+      } catch (err) { showAlert('alertBox', err.message); }
+    });
+
+    loadJobs();
+    loadCompanySelect();
+  </script>
+</body>
+</html>

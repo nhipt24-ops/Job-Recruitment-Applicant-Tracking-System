@@ -1,0 +1,114 @@
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-600: #4b5563;
+  --gray-800: #1f2937;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  min-height: 100vh;
+}
+
+.navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
+
+.card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.job-card .badge { font-weight: 500; }
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-reviewing { background: #dbeafe; color: #1e40af; }
+.status-interview { background: #e0e7ff; color: #3730a3; }
+.status-offered { background: #d1fae5; color: #065f46; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+.status-hired { background: #dcfce7; color: #166534; }
+.status-open { background: #d1fae5; color: #065f46; }
+.status-closed { background: #f3f4f6; color: #4b5563; }
+
+.sidebar {
+  min-height: calc(100vh - 56px);
+  background: white;
+  border-right: 1px solid var(--gray-200);
+}
+
+.sidebar .nav-link {
+  color: var(--gray-600);
+  border-radius: 8px;
+  margin: 2px 8px;
+  padding: 10px 16px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: #eff6ff;
+  color: var(--primary);
+}
+
+.table th { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--gray-600); }
+.table td { vertical-align: middle; }
+
+.hero {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+.stat-card {
+  border-left: 4px solid var(--primary);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.login-container {
+  max-width: 420px;
+  margin: 4rem auto;
+}
+
+.alert { border-radius: 10px; }
+
+footer {
+  background: white;
+  border-top: 1px solid var(--gray-200);
+  padding: 1.5rem 0;
+  margin-top: 3rem;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .sidebar { min-height: auto; border-right: none; border-bottom: 1px solid var(--gray-200); }
+}

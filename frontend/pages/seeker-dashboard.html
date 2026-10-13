@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Ứng viên - Job ATS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Job ATS - Ứng viên</a>
+      <div class="d-flex align-items-center gap-3 text-white">
+        <span id="userName"></span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Đăng xuất</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2 sidebar py-3">
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#" data-tab="jobs">Tìm việc</a>
+          <a class="nav-link" href="#" data-tab="applications">Đơn ứng tuyển</a>
+          <a class="nav-link" href="#" data-tab="interviews">Lịch phỏng vấn</a>
+          <a class="nav-link" href="#" data-tab="profile">Hồ sơ cá nhân</a>
+        </nav>
+      </div>
+      <div class="col-md-10 p-4">
+        <div id="alertBox"></div>
+
+        <!-- TAB: Jobs -->
+        <div id="tab-jobs">
+          <h4 class="mb-3">Danh sách việc làm đang tuyển</h4>
+          <div class="row g-2 mb-3">
+            <div class="col-md-4"><input type="text" id="searchJob" class="form-control" placeholder="Tìm kiếm..."></div>
+            <div class="col-md-3"><input type="text" id="locJob" class="form-control" placeholder="Địa điểm"></div>
+            <div class="col-md-2">
+              <select id="typeJob" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="full_time">Full-time</option>
+                <option value="part_time">Part-time</option>
+                <option value="internship">Internship</option>
+                <option value="remote">Remote</option>
+              </select>
+            </div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" onclick="loadJobs()">Tìm</button></div>
+          </div>
+          <div id="jobList" class="row g-3"></div>
+        </div>
+
+        <!-- TAB: Applications -->
+        <div id="tab-applications" class="d-none">
+          <h4 class="mb-3">Đơn ứng tuyển của tôi</h4>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead><tr><th>Vị trí</th><th>Công ty</th><th>Ngày nộp</th><th>Trạng thái</th></tr></thead>
+              <tbody id="appTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: Interviews -->
+        <div id="tab-interviews" class="d-none">
+          <h4 class="mb-3">Lịch phỏng vấn</h4>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead><tr><th>Vị trí</th><th>Công ty</th><th>Thời gian</th><th>Hình thức</th><th>Link/Địa điểm</th><th>Kết quả</th></tr></thead>
+              <tbody id="interviewTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: Profile -->
+        <div id="tab-profile" class="d-none">
+          <h4 class="mb-3">Hồ sơ cá nhân</h4>
+          <form id="profileForm" class="card p-4">
+            <div class="mb-3"><label class="form-label">Kỹ năng</label><textarea class="form-control" id="skills" rows="2"></textarea></div>
+            <div class="mb-3"><label class="form-label">Kinh nghiệm</label><textarea class="form-control" id="experience" rows="3"></textarea></div>
+            <div class="mb-3"><label class="form-label">Học vấn</label><textarea class="form-control" id="education" rows="2"></textarea></div>
+            <div class="mb-3"><label class="form-label">Tóm tắt</label><textarea class="form-control" id="summary" rows="2"></textarea></div>
+            <div class="mb-3"><label class="form-label">Link CV (URL)</label><input type="text" class="form-control" id="resume_url"></div>
+            <button type="submit" class="btn btn-primary">Lưu hồ sơ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Apply -->
+  <div class="modal fade" id="applyModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Nộp đơn ứng tuyển</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <p>Vị trí: <strong id="applyJobTitle"></strong></p>
+          <input type="hidden" id="applyJobId">
+          <div class="mb-3">
+            <label class="form-label">Thư xin việc (Cover letter)</label>
+            <textarea class="form-control" id="coverLetter" rows="4" placeholder="Giới thiệu bản thân và lý do ứng tuyển..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="submitApply()">Nộp đơn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    const user = requireAuth(['job_seeker']);
+    if (!user) throw new Error('auth');
+    document.getElementById('userName').textContent = user.full_name;
+
+    // Tab switching
+    document.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('[data-tab]').forEach(a => a.classList.remove('active'));
+        el.classList.add('active');
+        ['jobs','applications','interviews','profile'].forEach(t => {
+          document.getElementById('tab-' + t).classList.toggle('d-none', t !== el.dataset.tab);
+        });
+        if (el.dataset.tab === 'applications') loadApplications();
+        if (el.dataset.tab === 'interviews') loadInterviews();
+        if (el.dataset.tab === 'profile') loadProfile();
+      });
+    });
+
+    async function loadJobs() {
+      const params = {};
+      const s = document.getElementById('searchJob').value.trim();
+      const loc = document.getElementById('locJob').value.trim();
+      const type = document.getElementById('typeJob').value;
+      if (s) params.search = s;
+      if (loc) params.location = loc;
+      if (type) params.job_type = type;
+      try {
+        const jobs = await JobsAPI.list(params);
+        const list = document.getElementById('jobList');
+        if (!jobs.length) {
+          list.innerHTML = '<div class="col-12 text-muted">Không có việc làm.</div>';
+          return;
+        }
+        list.innerHTML = jobs.map(j => `
+          <div class="col-md-6">
+            <div class="card job-card h-100">
+              <div class="card-body">
+                <h5>${j.title}</h5>
+                <p class="text-muted small mb-1">${j.company_name} · ${j.location || ''} · ${j.job_type}</p>
+                <p class="text-primary fw-semibold">${formatSalary(j.salary_min, j.salary_max)}</p>
+                <p class="small">${(j.description || '').substring(0, 120)}...</p>
+                <button class="btn btn-primary btn-sm" onclick="openApply(${j.id}, '${j.title.replace(/'/g, "\\'")}')">Ứng tuyển</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    function openApply(jobId, title) {
+      document.getElementById('applyJobId').value = jobId;
+      document.getElementById('applyJobTitle').textContent = title;
+      document.getElementById('coverLetter').value = '';
+      new bootstrap.Modal(document.getElementById('applyModal')).show();
+    }
+
+    async function submitApply() {
+      const job_id = document.getElementById('applyJobId').value;
+      const cover_letter = document.getElementById('coverLetter').value;
+      try {
+        await ApplicationsAPI.apply(parseInt(job_id), cover_letter);
+        bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
+        showAlert('alertBox', 'Nộp đơn thành công!', 'success');
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadApplications() {
+      try {
+        const apps = await ApplicationsAPI.my();
+        document.getElementById('appTable').innerHTML = apps.map(a => `
+          <tr>
+            <td>${a.title}</td>
+            <td>${a.company_name}</td>
+            <td>${formatDate(a.applied_at)}</td>
+            <td>${statusBadge(a.status)}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="4" class="text-muted">Chưa có đơn nào.</td></tr>';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadInterviews() {
+      try {
+        const list = await InterviewsAPI.my();
+        document.getElementById('interviewTable').innerHTML = list.map(i => `
+          <tr>
+            <td>${i.job_title}</td>
+            <td>${i.company_name}</td>
+            <td>${formatDate(i.interview_date)}</td>
+            <td>${i.interview_type}</td>
+            <td>${i.location_or_link || '-'}</td>
+            <td>${statusBadge(i.result)}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="6" class="text-muted">Chưa có lịch phỏng vấn.</td></tr>';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    async function loadProfile() {
+      try {
+        const p = await ProfilesAPI.me();
+        document.getElementById('skills').value = p.skills || '';
+        document.getElementById('experience').value = p.experience || '';
+        document.getElementById('education').value = p.education || '';
+        document.getElementById('summary').value = p.summary || '';
+        document.getElementById('resume_url').value = p.resume_url || '';
+      } catch (e) { showAlert('alertBox', e.message); }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await ProfilesAPI.update({
+          skills: document.getElementById('skills').value,
+          experience: document.getElementById('experience').value,
+          education: document.getElementById('education').value,
+          summary: document.getElementById('summary').value,
+          resume_url: document.getElementById('resume_url').value
+        });
+        showAlert('alertBox', 'Đã lưu hồ sơ!', 'success');
+      } catch (err) { showAlert('alertBox', err.message); }
+    });
+
+    loadJobs();
+  </script>
+</body>
+</html>
