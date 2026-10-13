@@ -156,4 +156,3 @@ git push -u origin main
 - **CRUD**: đầy đủ trên Jobs, Applications, Companies, Profiles, Interviews, Users
 - **Database**: 6 bảng, khóa ngoại, UNIQUE constraint, dữ liệu mẫu sẵn
 
-Chúc nhóm đạt điểm cao!
